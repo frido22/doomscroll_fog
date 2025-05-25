@@ -1,0 +1,38 @@
+{
+  "name": "Doomscroll Fog",
+  "description": "Combats doom-scrolling by gradually blurring feeds.",
+  "version": "0.1.1",
+  "manifest_version": 3,
+  "permissions": [
+    "storage",
+    "activeTab",
+    "alarms",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icons/fog.svg",
+      "32": "icons/fog.svg",
+      "48": "icons/fog.svg",
+      "128": "icons/fog.svg"
+    },
+    "default_title": "Doomscroll Fog",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "options_page": "options.html"
+}

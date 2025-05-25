@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      margin: 0;
+      padding: 16px 14px 20px 14px;
+      width: 240px;
+      background: rgba(20,20,22,0.85);
+      color: #eee;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      backdrop-filter: blur(12px) brightness(1.08);
+      box-shadow: 0 2px 24px 0 rgba(0,0,0,0.23);
+      border: 1.5px solid rgba(255,255,255,0.07);
+      /* No border-radius for square look */
+    }
+
+    h3 {
+      margin: 0 0 16px 0;
+      font-size: 20px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 6px;
+      margin-top: 10px;
+      font-size: 14px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      /* No border-radius for square look */
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    button:hover { background: #333; }
+
+    #disable-btn {
+      border-color: #444;
+      color: #fff;
+      background: #222;
+    }
+
+    #disable-btn:hover {
+      background: #333;
+      color: #fff;
+    }
+
+    #today {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h3>Doomscroll Fog</h3>
+  <button id="snooze-btn">Snooze 30 min</button>
+  <button id="disable-btn">Disable on this site</button>
+  <button id="settings-btn">Settings</button>
+  <p id="today"></p>
+  <script src="popup.js"></script>
+</body>
+</html>

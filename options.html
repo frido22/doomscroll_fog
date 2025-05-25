@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Doomscroll Dimmer Options</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; }
+    select { width: 100%; height: 120px; }
+    label { display: block; margin-top: 20px; }
+    #status { color: green; }
+  </style>
+</head>
+<body>
+  <h1>Doomscroll Dimmer Options</h1>
+
+  <label>
+    Disabled Sites:
+    <select id="disabled-list" multiple style="height:80px"></select>
+  </label>
+  <button id="remove-disabled">Enable Selected</button>
+
+  <label>
+    Minutes before blur starts:
+    <input type="number" min="1" max="60" id="minute-input" value="2" style="width:60px;">
+  </label>
+
+  <button id="save">Save</button> <span id="status"></span>
+
+  <script src="options.js"></script>
+</body>
+</html>
