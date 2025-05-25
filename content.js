@@ -1,5 +1,5 @@
 const MAX_BLUR = 12; // px
-let secondsBeforeBlur = 600; // default 10 min before blur begins
+let secondsBeforeBlur = 30; // default 0.5 min before blur begins (30s)
 let doomSeconds = 0; // cumulative active scrolling seconds
 let activeUntil = 0; // timestamp in ms
 let lastFrame = Date.now();
@@ -178,7 +178,7 @@ chrome.storage.sync.get(['disabledSites', 'secondsBeforeBlur'], data => {
     return; // disabled, do nothing
   }
   const stored = Number(data.secondsBeforeBlur);
-  secondsBeforeBlur = stored >= 1 ? stored : 600;
+  secondsBeforeBlur = stored >= 1 ? stored : 30;
   start();
 });
 

@@ -4,12 +4,12 @@ Doomscroll Fog is a minimal Chrome extension that helps you curb doomscrolling b
 
 ## Features
 
-- **Time-based Blur**: Set how many minutes of active scrolling before the blur effect starts. Blur ramps up linearly after that threshold.
+- **Time-based Blur**: Set how many minutes of active scrolling before the blur effect starts (default: **0.5 min / 30 s**). Blur ramps up linearly after that threshold.
 - **Per-site Disable**: Instantly disable/enable the extension for any site via the popup or options page.
 - **Snooze**: Temporarily turn off the blur for 30 minutes on any site.
 - **Persistent Settings**: All settings and disables sync across Chrome browsers via `chrome.storage.sync`.
-- **Simple UI**: Clean popup and options page. Set your blur threshold in minutes (default: 2 min).
-- **SVG Icon**: Uses a transparent cloud/fog icon everywhere for a modern look.
+- **Simple UI**: Clean popup and options page. Set your blur threshold in minutes (default: 0.5 min).
+- **Transparent Icons**: Crisp PNGs (`icons/icon16/32/48/128.png`) generated from `fog.png`, no white square.
 
 ## Usage
 
@@ -21,7 +21,7 @@ Doomscroll Fog is a minimal Chrome extension that helps you curb doomscrolling b
 ## Development
 
 - All extension logic is in `content.js`, `background.js`, and UI in `popup.html`, `options.html`.
-- The icon is `icons/fog.svg` (used for all sizes).
+- **Transparent Icons**: Crisp PNGs (`icons/icon16/32/48/128.png`) generated from `fog.png`, no white square.
 - Settings and counters are stored in `chrome.storage.sync`.
 - No unnecessary code or dead functions—lean and maintainable.
 

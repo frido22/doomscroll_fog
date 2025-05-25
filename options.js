@@ -17,7 +17,7 @@ function populateDisabled(sites) {
 function load() {
   chrome.storage.sync.get(['disabledSites', 'secondsBeforeBlur'], data => {
     populateDisabled(data.disabledSites || []);
-    minuteInput.value = (data.secondsBeforeBlur||120)/60;
+    minuteInput.value = (data.secondsBeforeBlur||30)/60;
   });
 }
 

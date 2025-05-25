@@ -20,12 +20,18 @@
       "run_at": "document_idle"
     }
   ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "action": {
     "default_icon": {
-      "16": "icons/fog.svg",
-      "32": "icons/fog.svg",
-      "48": "icons/fog.svg",
-      "128": "icons/fog.svg"
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     },
     "default_title": "Doomscroll Fog",
     "default_popup": "popup.html"
