@@ -2,6 +2,7 @@ const snoozeBtn = document.getElementById('snooze-btn');
 const disableBtn = document.getElementById('disable-btn');
 const settingsBtn = document.getElementById('settings-btn');
 const todayEl = document.getElementById('today');
+let tooltipDiv = null;
 
 chrome.tabs.query({active: true, currentWindow: true}, tabs => {
   const tabId = tabs[0].id;
@@ -22,20 +23,160 @@ chrome.tabs.query({active: true, currentWindow: true}, tabs => {
   });
 });
 
+function showTooltip(anchor, html) {
+  hideTooltip();
+  tooltipDiv = document.createElement('div');
+  tooltipDiv.style.position = 'absolute';
+  tooltipDiv.style.background = '#222';
+  tooltipDiv.style.color = '#fff';
+  tooltipDiv.style.padding = '10px 14px';
+  tooltipDiv.style.borderRadius = '8px';
+  tooltipDiv.style.boxShadow = '0 2px 12px #0006';
+  tooltipDiv.style.fontSize = '13px';
+  tooltipDiv.style.zIndex = 9999;
+  tooltipDiv.style.maxWidth = '260px';
+  tooltipDiv.innerHTML = html;
+
+  document.body.appendChild(tooltipDiv);
+  const rect = anchor.getBoundingClientRect();
+  tooltipDiv.style.left = (rect.left + window.scrollX) + 'px';
+  tooltipDiv.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+}
+
+function hideTooltip() {
+  if (tooltipDiv) {
+    tooltipDiv.remove();
+    tooltipDiv = null;
+  }
+}
+
+function getSiteTotalsTooltip(callback) {
+  const todayKey = new Date().toLocaleDateString();
+  chrome.storage.sync.get(['siteTotals'], data => {
+    const siteTotals = data.siteTotals || {};
+    const todaySites = Object.entries(siteTotals)
+      .filter(([key]) => key.startsWith(todayKey + '|'))
+      .map(([key, seconds]) => {
+        const site = key.split('|')[1];
+        return {site, seconds};
+      })
+      .sort((a, b) => b.seconds - a.seconds);
+
+    let tooltip = '';
+    if (todaySites.length <= 5) {
+      tooltip = todaySites.map(s =>
+        `<div>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
+      ).join('');
+      callback(tooltip);
+    } else {
+      const firstTen = todaySites.slice(0, 5);
+      const rest = todaySites.slice(5);
+      tooltip = firstTen.map(s =>
+        `<div>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
+      ).join('');
+      tooltip += `<div id="expand-sites" style="color:#fff;cursor:pointer;margin-top:6px;">+${rest.length} more…</div>`;
+      callback(tooltip, todaySites);
+    }
+  });
+}
+
+todayEl.addEventListener('mouseenter', () => {
+  getSiteTotalsTooltip((tooltip, todaySites) => {
+    showTooltip(todayEl, tooltip);
+
+    // If expandable, add expand logic
+    if (todaySites && todaySites.length > 10) {
+      setTimeout(() => {
+        const expand = document.getElementById('expand-sites');
+        if (expand) {
+          expand.addEventListener('mouseenter', () => {
+            const allSites = todaySites.map(s =>
+              `<div>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
+            ).join('');
+            showTooltip(todayEl, allSites);
+          });
+          expand.addEventListener('mouseleave', () => {
+            showTooltip(todayEl, tooltip);
+          });
+        }
+      }, 0);
+    }
+  });
+});
+todayEl.addEventListener('mouseleave', hideTooltip);
+
 function updateToday() {
   chrome.storage.sync.get(['dailyTotals'], data => {
     const total = data.dailyTotals?.[new Date().toLocaleDateString()] || 0;
-    todayEl.textContent = (total/60).toLocaleString(undefined,{maximumFractionDigits:1}) + ' doom minutes today';
+    todayEl.textContent = (total/60).toLocaleString(undefined,{maximumFractionDigits:1}) + ' doom minutes today';  
   });
 }
 updateToday();
-// Also update if popup regains focus
-window.addEventListener('focus', updateToday);
 
-// Also update uf dailyTotals changes
+function getCurrentSiteKey() {
+  return `${new Date().toLocaleDateString()}|${location.hostname.replace(/^www\./, '')}`;
+}
+
+function updateCurrentSiteInTooltip() {
+  if (tooltipDiv && tooltipDiv.parentNode) {
+    const todayKey = new Date().toLocaleDateString();
+    const currentSiteKey = getCurrentSiteKey();
+    chrome.storage.sync.get(['siteTotals'], data => {
+      const siteTotals = data.siteTotals || {};
+      const todaySites = Object.entries(siteTotals)
+        .filter(([key]) => key.startsWith(todayKey + '|'))
+        .map(([key, seconds]) => {
+          const site = key.split('|')[1];
+          const isCurrent = key === currentSiteKey;
+          return {site, seconds, isCurrent};
+        })
+        .sort((a, b) => b.seconds - a.seconds);
+
+      let tooltip = '';
+      if (todaySites.length <= 5) {
+        tooltip = todaySites.map(s =>
+          `<div${s.isCurrent ? ' style="font-weight:bold;color:#ffd600;"' : ''}>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
+        ).join('');
+        showTooltip(todayEl, tooltip);
+      } else {
+        const firstTen = todaySites.slice(0, 10);
+        const rest = todaySites.slice(10);
+        tooltip = firstTen.map(s =>
+          `<div${s.isCurrent ? ' style="font-weight:bold;color:#ffd600;"' : ''}>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
+        ).join('');
+        tooltip += `<div id="expand-sites" style="color:#ffd600;cursor:pointer;margin-top:6px;">+${rest.length} more…</div>`;
+        showTooltip(todayEl, tooltip);
+
+        setTimeout(() => {
+          const expand = document.getElementById('expand-sites');
+          if (expand) {
+            expand.addEventListener('mouseenter', () => {
+              const allSites = todaySites.map(s =>
+                `<div${s.isCurrent ? ' style="font-weight:bold;color:#ffd600;"' : ''}>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
+              ).join('');
+              showTooltip(todayEl, allSites);
+            });
+            expand.addEventListener('mouseleave', () => {
+              showTooltip(todayEl, tooltip);
+            });
+          }
+        }, 0);
+      }
+    });
+  }
+}
+
+// Also update if popup regains focus
+window.addEventListener('focus', () => {
+  updateToday();
+  updateCurrentSiteInTooltip();
+});
+
+// Also update if dailyTotals changes
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'sync' && changes.dailyTotals) {
-    updateToday(); 
+  if (area === 'sync' && (changes.dailyTotals || changes.siteTotals)) {
+    updateToday();
+    updateCurrentSiteInTooltip();
   }
 });
 

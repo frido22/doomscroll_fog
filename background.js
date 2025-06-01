@@ -14,11 +14,18 @@ function flushTotals() {
   const todayKey = new Date().toLocaleDateString();
   const deltaToSave = pendingSeconds;
   pendingSeconds = 0;
-  chrome.storage.sync.get(['dailyTotals'], data => {
+  chrome.storage.sync.get(['dailyTotals', 'siteTotals'], data => {
     const totals = data.dailyTotals || {};
+    const siteTotals = data.siteTotals || {};
     const current = Number(totals[todayKey]) || 0;
     totals[todayKey] = current + deltaToSave;
-    chrome.storage.sync.set({dailyTotals: totals});
+
+    if (flushTotals.lastHostname) {
+      const siteKey = `${todayKey}|${flushTotals.lastHostname}`;
+      siteTotals[siteKey] = (siteTotals[siteKey] || 0) + deltaToSave;
+    }
+
+    chrome.storage.sync.set({dailyTotals: totals, siteTotals});
   });
   flushTimeout = null;
 }
@@ -28,6 +35,7 @@ chrome.runtime.onMessage.addListener((msg) => {
     const delta = Number(msg.delta) || 0;
     if (!delta) return;
     pendingSeconds += delta;
+    flushTotals.lastHostname = msg.hostname;
     if (!flushTimeout) {
       flushTimeout = setTimeout(flushTotals, 1000); // flush once per second max
     }

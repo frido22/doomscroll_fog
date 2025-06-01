@@ -141,7 +141,7 @@ function animate() {
   if (dt < 0 || dt > 10) dt = 0; // prevent NaN/negative/huge jumps
   if (now < activeUntil && (scrolledDown || scrolledRight)) {
     doomSeconds += dt;
-    chrome.runtime.sendMessage({type: 'updateActiveSeconds', delta: dt});
+    chrome.runtime.sendMessage({type: 'updateActiveSeconds', delta: dt, hostname: location.hostname});
   }
   lastFrame = now;
   prevScrollY = currScrollY;
