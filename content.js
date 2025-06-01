@@ -229,6 +229,9 @@ chrome.runtime.onMessage.addListener((msg) => {
     snoozedUntil = Date.now() + 60000; // 60 s legacy
   } else if (msg.type === 'snooze30') {
     snoozedUntil = Date.now() + 30 * 60 * 1000; // 30 minutes
+  } else if (msg.type === 'unsnooze') {
+    snoozedUntil = Date.now() + 1000; // 1 second blur and end
+    doomSeconds = 0 // reset tab doomscroll time to 0
   } else if (msg.type === 'disableSite') {
     chrome.storage.sync.get(['disabledSites'], s => {
       const arr = s.disabledSites || [];
