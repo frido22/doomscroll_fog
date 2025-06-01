@@ -135,16 +135,16 @@ function updateCurrentSiteInTooltip() {
       let tooltip = '';
       if (todaySites.length <= 5) {
         tooltip = todaySites.map(s =>
-          `<div${s.isCurrent ? ' style="font-weight:bold;color:#ffd600;"' : ''}>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
+          `<div${s.isCurrent ? ' style="font-weight:bold;color:#fff;"' : ''}>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
         ).join('');
         showTooltip(todayEl, tooltip);
       } else {
         const firstTen = todaySites.slice(0, 10);
         const rest = todaySites.slice(10);
         tooltip = firstTen.map(s =>
-          `<div${s.isCurrent ? ' style="font-weight:bold;color:#ffd600;"' : ''}>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
+          `<div${s.isCurrent ? ' style="font-weight:bold;color:#fff;"' : ''}>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
         ).join('');
-        tooltip += `<div id="expand-sites" style="color:#ffd600;cursor:pointer;margin-top:6px;">+${rest.length} more…</div>`;
+        tooltip += `<div id="expand-sites" style="color:#fff;cursor:pointer;margin-top:6px;">+${rest.length} more…</div>`;
         showTooltip(todayEl, tooltip);
 
         setTimeout(() => {
@@ -152,7 +152,7 @@ function updateCurrentSiteInTooltip() {
           if (expand) {
             expand.addEventListener('mouseenter', () => {
               const allSites = todaySites.map(s =>
-                `<div${s.isCurrent ? ' style="font-weight:bold;color:#ffd600;"' : ''}>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
+                `<div${s.isCurrent ? ' style="font-weight:bold;color:#fff;"' : ''}>${s.site}: ${(s.seconds/60).toFixed(1)} min</div>`
               ).join('');
               showTooltip(todayEl, allSites);
             });
