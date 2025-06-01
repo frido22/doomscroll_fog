@@ -6,6 +6,8 @@ let lastFrame = Date.now();
 let veil;
 let counter;
 let snoozedUntil = 0;
+let prevScrollY = window.scrollY;
+let prevScrollX = window.scrollX;
 
 const hostname = location.hostname.replace(/^www\./, '');
 
@@ -120,6 +122,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 function animate() {
   const now = Date.now();
+  const currScrollY = window.scrollY;
+  const currScrollX = window.scrollX;
+  const scrolledDown = currScrollY > prevScrollY;
+  const scrolledRight = currScrollX > prevScrollX;
 
   // Snooze handling
   if (now < snoozedUntil) {
@@ -133,11 +139,13 @@ function animate() {
   // Accumulate real active time only if user is within active window
   let dt = (now - lastFrame) / 1000;
   if (dt < 0 || dt > 10) dt = 0; // prevent NaN/negative/huge jumps
-  if (now < activeUntil) {
+  if (now < activeUntil && (scrolledDown || scrolledRight)) {
     doomSeconds += dt;
     chrome.runtime.sendMessage({type: 'updateActiveSeconds', delta: dt});
   }
   lastFrame = now;
+  prevScrollY = currScrollY;
+  prevScrollX = currScrollX;
 
   let blur = 0;
   if (doomSeconds > secondsBeforeBlur) {
