@@ -1,4 +1,6 @@
 const snoozeBtn = document.getElementById('snooze-btn');
+const snoozeLabel = document.getElementById('snooze-label');
+const snoozeProgress = document.getElementById('snooze-progress');
 const disableBtn = document.getElementById('disable-btn');
 const settingsBtn = document.getElementById('settings-btn');
 const todayEl = document.getElementById('today');
@@ -6,9 +8,54 @@ const todayEl = document.getElementById('today');
 chrome.tabs.query({active: true, currentWindow: true}, tabs => {
   const tabId = tabs[0].id;
 
+  let snoozeTimer = null;
+  let snoozeEnd = 0;
+
+  function updateSnoozeUI() {
+    chrome.storage.sync.get(['snoozedUntil'], data => {
+      const now = Date.now();
+      snoozeEnd = data.snoozedUntil || 0;
+      if (snoozeEnd > now) {
+        // Snooze is active
+        const total = 30 * 60 * 1000; // 30 min
+        const left = Math.max(0, snoozeEnd - now);
+        const percent = 1 - (left / total);
+        snoozeLabel.textContent = 'Unsnooze';
+        snoozeProgress.style.width = (percent * 100) + '%';
+        snoozeProgress.style.display = 'block';
+        snoozeBtn.classList.add('snooze-active');
+        if (!snoozeTimer) {
+          snoozeTimer = setInterval(updateSnoozeUI, 1000);
+        }
+      } else {
+        // Not snoozed
+        snoozeLabel.textContent = 'Snooze 30 min';
+        snoozeProgress.style.width = '0';
+        snoozeProgress.style.display = 'block';
+        snoozeBtn.classList.remove('snooze-active');
+        if (snoozeTimer) {
+          clearInterval(snoozeTimer);
+          snoozeTimer = null;
+        }
+      }
+    });
+  }
+
   snoozeBtn.addEventListener('click', () => {
-    chrome.tabs.sendMessage(tabId, {type: 'snooze30'});
-    window.close();
+    chrome.storage.sync.get(['snoozedUntil'], data => {
+      const now = Date.now();
+      const snoozedUntil = data.snoozedUntil || 0;
+      if (snoozedUntil > now) {
+        // Unsnooze
+        chrome.tabs.sendMessage(tabId, {type: 'unsnooze'});
+        chrome.storage.sync.set({snoozedUntil: 0}, updateSnoozeUI);
+      } else {
+        // Start snooze
+        chrome.tabs.sendMessage(tabId, {type: 'snooze30'});
+        chrome.storage.sync.set({snoozedUntil: now + 30 * 60 * 1000}, updateSnoozeUI);
+      }
+      setTimeout(updateSnoozeUI, 200);
+    });
   });
 
   disableBtn.addEventListener('click', () => {
@@ -20,6 +67,8 @@ chrome.tabs.query({active: true, currentWindow: true}, tabs => {
     chrome.runtime.openOptionsPage();
     window.close();
   });
+
+  updateSnoozeUI();
 });
 
 function updateToday() {
@@ -50,8 +99,8 @@ if (reviewLink) reviewLink.style.color = '#aaa';
 const sundaiLink = document.querySelector('#review-section a[href*="sundai.club"]');
 if (sundaiLink) sundaiLink.style.color = '#aaa';
 
-// Add star CSS if not present
-(function addStarStyles() {
+// Add star and snooze progress CSS if not present
+(function addPopupStyles() {
   const style = document.createElement('style');
   style.textContent = `
     .star {
@@ -71,6 +120,19 @@ if (sundaiLink) sundaiLink.style.color = '#aaa';
       color: #ffd600;
       transform: scale(1.14);
       filter: drop-shadow(0 2px 2px #222a);
+    }
+    .snooze-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    #snooze-progress {
+      position: absolute;
+      left: 0; top: 0; height: 100%; width: 0;
+      background: #bbb;
+      opacity: 0.35;
+      z-index: 0;
+      transition: width 0.25s;
+      pointer-events: none;
     }
   `;
   document.head.appendChild(style);
