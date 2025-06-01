@@ -32,6 +32,13 @@ updateToday();
 // Also update if popup regains focus
 window.addEventListener('focus', updateToday);
 
+// Also update uf dailyTotals changes
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && changes.dailyTotals) {
+    updateToday(); 
+  }
+});
+
 // --- Star review encouragement logic ---
 const starRow = document.getElementById('star-row');
 const stars = starRow ? starRow.querySelectorAll('.star') : [];
